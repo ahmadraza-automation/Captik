@@ -1,0 +1,458 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Captik — AI Video & Caption Studio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .dropzone-box {
+    border: 2px dashed #3A4252;
+    background-color: #161B22;
+    padding: 35px 20px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.dropzone-box:hover {
+    border-color: #FFC531;
+    background-color: #1F2633;
+}
+        body {
+            background-color: #0E1117;
+            color: #FAFAFA;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding-top: 80px; /* Navbar space */
+        }
+    .navbar-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(22, 25, 32, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #2D3139;
+    padding: 18px 32px; /* Yahan padding barha di hai taaki bara logo fit aaye */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+        
+        .navbar-brand-custom {
+            font-size: 18px;
+            font-weight: 800;
+            color: #FFC531;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #8A8F98;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #FAFAFA;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        /* Feature Cards Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .feature-card {
+            background-color: #161920;
+            border: 1px solid #2D3139;
+            border-radius: 14px;
+            padding: 25px;
+            transition: border-color 0.2s;
+        }
+        .feature-card:hover {
+            border-color: #B99A5B;
+        }
+        .upload-box {
+            border: 2px dashed #2D3139;
+            background-color: #161920;
+            padding: 30px;
+            border-radius: 14px;
+            margin-bottom: 40px;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #B99A5B 0%, #8C723D 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 12px 24px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #CFB173 0%, #B99A5B 100%);
+        }
+        input, select {
+            background: #1A1C23;
+            border: 1px solid #2D3139;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        /* Font picker */
+        .font-picker-wrap {
+            position: relative;
+        }
+        .font-picker-wrap input {
+            margin-bottom: 0;
+        }
+        .font-results {
+            position: absolute;
+            z-index: 20;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            max-height: 240px;
+            overflow-y: auto;
+            background: #1A1C23;
+            border: 1px solid #2D3139;
+            border-radius: 8px;
+            display: none;
+        }
+        .font-results .font-option {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .font-results .font-option:hover {
+            background: #2D3139;
+        }
+        .font-hint {
+            font-size: 12px;
+            color: #8A8F98;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- VIP Top Navigation Bar -->
+    <nav class="navbar-custom">
+        <!-- Left: Brand Logo & Badge -->
+        <div class="d-flex align-items-center gap-3">
+            <a href="#" class="navbar-brand-custom">
+                <img src="{% static 'images/aura_logo.png' %}" alt="Aura Clips" style="height: 55px; width: auto; object-fit: contain;">
+            </a>
+            <span class="badge px-3 py-2 fw-semibold rounded-pill" style="background-color: rgba(185, 154, 91, 0.15); color: #B99A5B; border: 1px solid rgba(185, 154, 91, 0.3); font-size: 11px; letter-spacing: 0.5px;">
+                AI STUDIO v2.0
+            </span>
+        </div>
+
+        <!-- Center: Interactive Navigation Links -->
+        <ul class="nav-links mb-0 list-unstyled d-flex align-items-center gap-4">
+            <li><a href="#" class="nav-link text-light text-decoration-none fw-medium transition">Dashboard</a></li>
+            <li><a href="#upload-section" class="nav-link text-light text-decoration-none fw-medium transition">Templates</a></li>
+            <li><a href="#" class="nav-link text-light text-decoration-none fw-medium transition">Analytics</a></li>
+            <li><a href="#" class="nav-link text-light text-decoration-none fw-medium transition">Settings</a></li>
+        </ul>
+
+        <!-- Right: Interactive Status, Theme Toggle & Action Button -->
+        <div class="d-flex align-items-center gap-3">
+            <!-- Interactive Status Dropdown -->
+            <div class="dropdown d-none d-md-block">
+                <button class="btn dropdown-toggle d-flex align-items-center gap-2 px-3 py-1.5 rounded-pill shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #1A1D24; border: 1px solid #2D3139; color: #E5E7EB; font-size: 13px;">
+                    <span class="rounded-circle" style="width: 8px; height: 8px; background-color: #10B981; display: inline-block; box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);"></span>
+                    <span class="fw-medium">AI Engine: Online</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark shadow-lg rounded-3 py-2 border-secondary" style="background-color: #161B22; border-color: #2D3139 !important; font-size: 13px;">
+                    <li><h6 class="dropdown-header text-muted text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">System Status</h6></li>
+                    <li><a class="dropdown-item d-flex align-items-center justify-content-between py-2 text-light" href="#"><span>⚡ Whisper Model</span> <span class="badge bg-success bg-opacity-10 text-success">Active</span></a></li>
+                    <li><a class="dropdown-item d-flex align-items-center justify-content-between py-2 text-light" href="#"><span>🎬 FFmpeg Render</span> <span class="badge bg-success bg-opacity-10 text-success">Ready</span></a></li>
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                    <li><a class="dropdown-item py-2 text-warning fw-medium" href="#">🔄 Restart Services</a></li>
+                </ul>
+            </div>
+
+            <!-- Theme Toggle Button -->
+            <button class="btn btn-dark rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; background-color: #1A1D24; border: 1px solid #2D3139; color: #FFC531;" title="Toggle Theme">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </button>
+
+            <!-- Functional Open Editor CTA Button -->
+            <a href="#upload-section" class="btn fw-bold px-4 py-2 rounded-pill shadow" style="background: linear-gradient(135deg, #FFC531 0%, #E5A912 100%); color: #111418; border: none; transition: all 0.2s ease; font-size: 14px;">
+                Open Editor ⚡
+            </a>
+        </div>
+    </nav>
+    <!-- Hero Section Style Reference -->
+<section class="text-center py-5 my-4">
+    <div class="container" style="max-width: 900px;">
+        <!-- Bada Bold Title -->
+        <h1 class="fw-bold text-white mb-3" style="font-size: 3.5rem; line-height: 1.2; letter-spacing: -1.5px;">
+            Transform Videos that get <span style="color: #FFC531;">Aura Clips</span> right.
+        </h1>
+        
+        <!-- Description Subtitle -->
+        <p class="text-muted fs-5 mb-4" style="max-width: 650px; margin: 0 auto;">
+            Most caption tools mangle code-mixed speech. Aura Clips generates precise AI captions with custom kinetic styles, then lets you edit every word before export, up to 4K.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
+            <a href="#upload-section" class="btn fw-bold px-4 py-3 rounded-pill shadow-lg text-dark" style="background-color: #FFC531; border: none; transition: transform 0.2s;">
+                Open the editor &rarr;
+            </a>
+            <a href="#styles-section" class="btn btn-outline-light fw-bold px-4 py-3 rounded-pill" style="border-color: #2D3139; background-color: rgba(255,255,255,0.02);">
+                See the styles
+            </a>
+        </div>
+
+        
+        <!-- Subnote text -->
+        <p class="text-muted small mt-3" style="font-size: 13px;">
+            No card needed &bull; first watermark-free export free
+        </p>
+    </div>
+</section>
+    <div class="main-container">
+        <h2 class="fw-bold mb-2">Good to see you, Creator 👋</h2>
+        <p class="text-muted mb-4">Upload your video, pick a kinetic style, and let AI generate professional captions.</p>
+
+        <!-- Upload Form Section -->
+        <form method="POST" enctype="multipart/form-data" class="upload-box">
+            {% csrf_token %}
+            <!-- Top Mode Selection & Tabs Header -->
+<div class="mb-4 pb-3 border-bottom" style="border-color: #2D3139 !important;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <!-- Mode Title / Indicator -->
+        <div class="d-flex align-items-center gap-2">
+            <span class="p-2 rounded-2" style="background-color: rgba(255, 197, 49, 0.1); color: #FFC531;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            </span>
+            <span class="text-white fw-bold tracking-wide" style="font-size: 14px; letter-spacing: 1px;">MODE</span>
+        </div>
+
+        <!-- Wide Interactive Mode/Action Tabs -->
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" class="btn px-3 py-2 fw-semibold rounded-3 text-dark shadow-sm" style="background-color: #FFC531; border: none; font-size: 13px;">
+                ⚡ AUTO CAPTION
+            </button>
+            <button type="button" class="btn px-3 py-2 fw-semibold rounded-3 text-light" style="background-color: #1A1D24; border: 1px solid #2D3139; font-size: 13px;">
+                🎬 KINETIC STYLE
+            </button>
+            <button type="button" class="btn px-3 py-2 fw-semibold rounded-3 text-light" style="background-color: #1A1D24; border: 1px solid #2D3139; font-size: 13px;">
+                ⚙️ ADVANCED
+            </button>
+        </div>
+    </div>
+</div>
+            <!-- Project Title Input -->
+            <div class="mb-4">
+                <label class="form-label text-light fw-medium small mb-2" style="letter-spacing: 0.5px;">PROJECT TITLE</label>
+                <div class="input-group">
+                    <span class="input-group-text border-secondary text-muted px-3" style="background-color: #111418; border-color: #2D3139 !important;">
+                        ✏️
+                    </span>
+                    <input type="text" name="title" class="form-control text-light shadow-none py-3 px-3" placeholder="e.g. Podcast Clip #1" style="background-color: #111418; border-color: #2D3139; color: #fff;">
+                </div>
+            </div>
+
+            <!-- Template Selector Box -->
+            <div class="mb-4">
+                <label class="form-label text-light fw-medium small mb-2" style="letter-spacing: 0.5px;">CAPTION TEMPLATE</label>
+                <div class="input-group">
+                    <span class="input-group-text border-secondary text-muted px-3" style="background-color: #111418; border-color: #2D3139 !important;">
+                        🎬
+                    </span>
+                    <select name="template_id" class="form-select text-light shadow-none py-3 px-3" style="background-color: #111418; border-color: #2D3139; color: #fff;">
+                        <option value="" selected disabled>No templates found. Add via Admin panel!</option>
+                    </select>
+                </div>
+            </div>
+
+           <!-- Custom Google Font Live Search Picker -->
+            <div class="mb-4">
+                <label class="form-label text-light fw-medium small mb-2" style="letter-spacing: 0.5px;">CUSTOM GOOGLE FONT (OPTIONAL)</label>
+                <div class="font-picker-wrap position-relative">
+                    <div class="input-group">
+                        <span class="input-group-text border-secondary text-muted px-3" style="background-color: #111418; border-color: #2D3139 !important;">🔍</span>
+                        <input type="text" id="font-search" name="selected_font" class="form-control text-light shadow-none py-3 px-3" placeholder="Search a Google Font (overrides template font)" style="background-color: #111418; border-color: #2D3139; color: #fff;" autocomplete="off">
+                    </div>
+                    <!-- Live Search Results Dropdown -->
+                    <div id="font-results" class="font-results shadow-lg rounded-3 mt-1 position-absolute w-100" style="z-index: 100; background-color: #161B22; border: 1px solid #2D3139; max-height: 200px; overflow-y: auto; display: none;"></div>
+                </div>
+                <!-- Selected Font Hint -->
+                <div class="font-hint text-muted mt-2" id="font-selected" style="font-size: 12px; color: #8A8F98;">No font selected — template's default font will be used.</div>
+            </div>
+
+            <div class="mb-4">
+    <label class="dropzone-box d-block" for="videoFile">
+        <div class="mb-2">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFC531" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+        </div>
+        <span class="fw-bold text-light" style="font-size: 15px;">Drag & drop your video here, or <text style="color: #FFC531;">browse</text></span>
+        <p class="text-muted small mt-1 mb-0">Supports MP4, MOV, AVI (Max file size up to 500MB)</p>
+        <!-- Asli hidden file input -->
+        <input type="file" name="input_video" id="videoFile" class="d-none" required>
+    </label>
+</div>
+            <button type="submit" class="btn-gold mt-2">✨ Process & Render Video</button>
+        </form>
+
+        <!-- Features Showcase Grid -->
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h5 class="fw-bold text-warning mb-2">Built for Hinglish</h5>
+                <p class="text-muted small">Our transcription model understands Hindi-English code-switching out of the box, handling slang and mixed-script text effortlessly.</p>
+                <div class="p-2 rounded bg-dark border border-secondary text-muted small mt-3">
+                    "Basically technically speaking yaar..."<br>
+                    "Aaj ka video dekh bhai, life-changing hai"
+                </div>
+            </div>
+           <div class="feature-card">
+                <h5 class="fw-bold text-warning mb-2">⚡ Pro Kinetic Presets</h5>
+                <p class="text-muted small">Hormozi, Neon Glow, Cinematic Playfair, and Viral Impact. Built with custom ASS script styling and high-speed background rendering.</p>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="badge bg-dark border border-secondary text-warning">Hormozi</span>
+                    <span class="badge bg-dark border border-secondary text-info">Neon Cyber</span>
+                    <span class="badge bg-dark border border-secondary text-light">Cinematic</span>
+                    <span class="badge bg-dark border border-secondary text-danger">Viral Impact</span>
+                    <span class="badge bg-dark border border-secondary text-success">Montserrat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects List Section -->
+        <div class="projects-section">
+            <h4 class="fw-bold mb-3">Your Projects</h4>
+            {% if projects %}
+                <div class="list-group">
+                    {% for proj in projects %}
+                        <div class="list-group-item bg-dark text-white mb-3 p-3 rounded border border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">{{ proj.title|default:"Untitled Clip" }}</h5>
+                                <p class="mb-0 text-muted">
+                                    Status: <span class="text-warning fw-bold">{{ proj.status|title }}</span>
+                                    · Font: <span class="text-info">{{ proj.active_font }}</span>
+                                </p>
+                            </div>
+
+                            {% if proj.status == 'completed' and proj.output_video %}
+                                <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#previewModal{{ proj.id }}">
+                                    🎬 Preview & Download
+                                </button>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="previewModal{{ proj.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content bg-dark text-white border border-secondary">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Preview: {{ proj.title }}</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-center">
+                                                <video controls class="w-100 rounded">
+                                                    <source src="{{ proj.output_video.url }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="{{ proj.output_video.url }}" class="btn btn-success" download>📥 Download Video</a>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No projects created yet. Upload your first video above!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fontInput = document.getElementById('font-search');
+        const fontResults = document.getElementById('font-results');
+        const fontHidden = document.getElementById('selected-font-value');
+        const fontHint = document.getElementById('font-selected-hint');
+
+        let debounceTimer;
+
+        fontInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const q = fontInput.value.trim();
+
+            // typing again clears any previous confirmed selection
+            fontHidden.value = '';
+
+            debounceTimer = setTimeout(() => {
+                if (q.length === 0) {
+                    fontResults.style.display = 'none';
+                    return;
+                }
+                fetch(`/fonts/search/?q=${encodeURIComponent(q)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        fontResults.innerHTML = '';
+                        if (!data.fonts || data.fonts.length === 0) {
+                            fontResults.style.display = 'none';
+                            return;
+                        }
+                        data.fonts.forEach(font => {
+                            const item = document.createElement('div');
+                            item.className = 'font-option';
+                            item.textContent = font;
+                            item.addEventListener('click', () => {
+                                fontInput.value = font;
+                                fontHidden.value = font;
+                                fontHint.textContent = `Selected font: ${font}`;
+                                fontResults.style.display = 'none';
+                            });
+                            fontResults.appendChild(item);
+                        });
+                        fontResults.style.display = 'block';
+                    })
+                    .catch(() => {
+                        fontResults.style.display = 'none';
+                    });
+            }, 200);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!fontResults.contains(e.target) && e.target !== fontInput) {
+                fontResults.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
